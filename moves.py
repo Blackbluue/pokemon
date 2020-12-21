@@ -1,48 +1,17 @@
 """Contains classes relating to a battle moves that pokemon can use."""
 import csv
 
+import battle_effects
+
+
 class Move:
     """Interface for a pokemon's battle move."""
+
     def __init__(self, name, move_file):
         """Constructor for the Move class.
 
         This constructor should be called with the name of the move to create
         and a csv that contains the information defining the move.
-        Required kwargs:
-            name                   -- the name of the move
-            type                   -- the type of the move
-            category               -- whether the move is physical or special
-            pp                     -- the maximum power point value for the move
-                                      damage, or a status move
-            base_power             -- the base power of the move
-            accuracy               -- the accuracy of the move
-            flavor_text            -- flavor text for the move, a brief
-                                      description of what it does
-            effect                 -- the additional effect that the move may
-                                      cause
-            effect_rate            -- the chance the additoinal effect will
-                                      occur
-            cit_ratio              -- the base chance the damaging move will
-                                      cause critical damage
-            priority               -- the speed priority of the move
-            target                 -- the target of the move in battle
-            contact                -- whether the pokemon using the move makes
-                                      physical contact with its target
-            sound                  -- whether the move is sound based
-            punch                  -- whether the move is a punching move
-            biting                 -- whether the move is a biting move
-            snatchable             -- whether the move can be snatched
-            gravity                -- whether the move is affected by gravity
-            defrost                -- whether the move defrosts the pokemon if
-                                      it is frozen
-            reflectable            -- whether the move can be reflected by
-                                      magic coat/magic bounce
-            blockable              -- whether the move can be blocked by
-                                      protect/detect
-            copyable               -- whether the move can be copied by mirror
-                                      move
-            unique_effect          -- additional notes on irregular effects. Is
-                                      ignored by the base Move class
         """
         try:
             # assume move_file is a string, the path to the file
@@ -56,42 +25,18 @@ class Move:
         move_info = next(filtered)
         self._parse_info(move_info)
 
-        self._name = move_info["name"]
-        self._type = move_info["type"]
-        self._category = move_info["category"]
-        self._pp_max = move_info["pp"]
-        self._pp_cur = self._pp_max
-        self._base_power = move_info["base_power"]
-        self._accuracy = move_info["accuracy"]
-        self._flavor_text = move_info["flavor_text"]
-        ###--TO DO--###
-        # add code to properly set an effect to the move
-        self._set_effect(move_info["effect"], move_info["effect_rate"])
-        self._cit_ratio = move_info["cit_ratio"]
-        self._priority = move_info["priority"]
-        self._target = move_info["target"]
-        self._contact = move_info["contact"]
-        self._sound = move_info["sound"]
-        self._punch = move_info["punch"]
-        self._biting = move_info["biting"]
-        self._snatchable = move_info["snatchable"]
-        self._gravity = move_info["gravity"]
-        self._defrost = move_info["defrost"]
-        self._reflectable = move_info["reflectable"]
-        self._blockable = move_info["blockable"]
-
     ########## Class Constants ##########
 
     ########## Properties ##########
     @property
     def name(self):
         """The name of the move."""
-        return self._name
+        return self._move_info["name"]
 
     @property
     def type(self):
         """The type of the move."""
-        return self._type
+        return self._move_info["type"]
 
     @property
     def category(self):
@@ -99,63 +44,82 @@ class Move:
 
         Valid categories include: physical, special, other.
         """
-        return self._category
+        return self._move_info["category"]
 
     @property
     def pp_max(self):
         """The maximum value for this move's power points."""
-        return self._pp_max
+        return self._move_info["pp_max"]
+
+    @property
+    def pp_up(self):
+        """The amount of times this move's max power points has been raised.
+
+        A move's max power points can only be raised 5 times.
+        """
+        return self._move_info["pp_up"]
 
     @property
     def pp_cur(self):
         """The current value for this move's power points."""
-        return self._pp_cur
+        return self._move_info["pp_cur"]
 
     @pp_cur.setter
     def pp_cur(self, value):
-        if value > self._pp_max or value < 0:
+        if value > self._move_info["pp_max"] or value < 0:
             raise ValueError(f"Improper value for current pp: {value}")
-        self._pp_cur = value
+        self._move_info["pp_cur"] = value
 
     @property
     def base_power(self):
-        """The base power for this move."""
-        return self._base_power
+        """The base power for this move.
+
+        Moves that do not deal damage will have a base power of None.
+        """
+        return self._move_info["base_power"]
 
     @property
     def accuracy(self):
-        """The accuracy for this move."""
-        return self._accuracy
+        """The accuracy for this move.
+
+        Moves that cannot miss will have an accuracy of None.
+        """
+        return self._move_info["accuracy"]
 
     @property
     def flavor_text(self):
         """The simple description for this move."""
-        return self._flavor_text
+        return self._move_info["flavor_text"]
 
     @property
     def effect(self):
-        """The effect that may be applied by this move."""
+        """The effect that may be applied by this move.
+
+        Moves that do not have additional effects will have an effect of None.
+        """
         ###--TO DO--###
         # add code to properly set an effect to the move
         # should return a tuple of 2 items; the name of the effect and a
         # function used to apply the effect to a target
-        return self._effect
+        return self._move_info["effect"]
 
     @property
     def effect_rate(self):
         """The chance that the additional effect will occur, if present.
 
-        If this move has no additional effect, this property will be None
+        If this move has no additional effect or if the effect cannot fail,
+        this property will be None
         """
-        return self._effect_rate
+        return self._move_info["effect_rate"]
 
     @property
     def cit_ratio(self):
         """The chance this damaging move will deal critical damage.
 
-        Moves that do not deal damage will have a critical ratio of 0.
+        Moves that cannot deal critical damage will have a critical ratio of
+        sNone.
         """
-        return self._cit_ratio
+        return self._move_info["cit_ratio"]
 
     @property
     def priority(self):
@@ -165,7 +129,7 @@ class Move:
         priorirty. If both moves have the same priority, the pokemon with the
         higher speed stat will act first.
         """
-        return self._priority
+        return self._move_info["priority"]
 
     @property
     def target(self):
@@ -176,81 +140,100 @@ class Move:
         single_any, user_or_adjacent_ally, all_adjacent_foe, all_adjacent_any,
         all_foes, field, team, special.
         """
-        return self._target
+        return self._move_info["target"]
 
     @property
     def contact(self):
         """Whether the move makes physical contact with its target."""
-        return self._contact
+        return self._move_info["contact"]
 
     @property
     def sound(self):
         """Whether the move utilizes sound."""
-        return self._sound
+        return self._move_info["sound"]
 
     @property
     def punch(self):
         """Whether the move is a punch."""
-        return self._punch
+        return self._move_info["punch"]
 
     @property
     def biting(self):
         """Whether the move is a biting move."""
-        return self._biting
+        return self._move_info["biting"]
 
     @property
     def snatchable(self):
         """Whether the move is snatchable."""
-        return self._snatchable
+        return self._move_info["snatchable"]
 
     @property
     def gravity(self):
         """Whether the move is affected by gravity."""
-        return self._gravity
+        return self._move_info["gravity"]
 
     @property
     def defrost(self):
         """Whether the move defrosts the pokemon if it is frozen."""
-        return self._defrost
+        return self._move_info["defrost"]
 
     @property
     def reflectable(self):
         """Whether the move can be reflected by magic coat or magic bounce."""
-        return self._reflectable
+        return self._move_info["reflectable"]
 
     @property
     def blockable(self):
         """Whether the move can be blocked by protect or detect."""
-        return self._blockable
+        return self._move_info["blockable"]
 
     @property
     def copyable(self):
         """Whether the move can be copied by mirror move."""
-        return self._copyable
+        return self._move_info["copyable"]
 
 
     ########## Class/Static Methods ##########
-    @staticmethod
-    def _get_move_info(name, reader):
-        """Pull the required information from the csv for the specified move."""
-        ###--TO DO--###
-        # add code to read the csv and get the necessary info
-        try:
-            # assume move_file is a string, the path to the file
-            with open(move_file, newline="") as fh:
-                reader = csv.DictReader(fh)
-                filtered = (info for info in reader if info["name"] == name)
-                self._move_info = next(filtered)
-        except TypeError:
-            # move_file is a file-like object
-            reader = csv.DictReader(move_file)
-            filtered = (info for info in reader if info["name"] == name)
-            self._move_info = next(filtered)
 
     ########## Instance Methods ##########
-    def _parse_info(move_info):
+    def _parse_info(self, move_info):
         """Parse the supplied dictionary for info to initialize this move."""
-        pass
+        if not battle_effects.verify_move(move_info):
+            raise ValueError("Error reading move information: "
+                             f"{move_info["name"]}")
+
+        move_info["pp_up"] = 0
+        move_info["pp_cur"] = move_info["pp_max"]
+        self._move_info = move_info
+
+    def execute(self, source_pokemon, target_pokemon, field):
+        """Perform this move on the target.
+
+        If a pokemon uses a move on itself, both the source and target pokemon
+        should be the same object. Any effects on the field that may alter the
+        move will be applied. A numerical status code will be returned to
+        signify the result of the move. Code are as follows:
+            0  - the move succeeded normally
+            1  - the damaging move has scored a critical hit
+            2  - the damaging move has scored a critical hit due to affection
+            3  - the damaging move was super effective due to type match ups
+            4  - the damaging move was not very effective due to type match ups
+            5  - the move had no effect due to type match ups
+            6  - the move has missed due to low accuracy or high evasion
+            7  - the move has missed due to the target's high friendship
+            8  - the move's effect cannot be applied due to the target already
+                 being affected
+            9  - the move failed due to the source being paralyzed
+            10 - the move failed due to the source being asleep
+            11 - the move failed due to the source being confused
+            12 - the move failed due to the source being infatuated
+            13 - the move failed due to the target blocking the move
+            14 - the move failed due to the source's disobedience
+            15 - the move failed due to some other factor
+        """
+        status_code = battle_effects.apply_move(self._move_info,
+            source_pokemon, target_pokemon, field)
+        return status_code
 
     def _set_effect(self, effect, effect_rate):
         """Set the effect for this move."""
