@@ -52,14 +52,6 @@ class Move:
         return self._move_info["pp_max"]
 
     @property
-    def pp_up(self):
-        """The amount of times this move's max power points has been raised.
-
-        A move's max power points can only be raised 5 times.
-        """
-        return self._move_info["pp_up"]
-
-    @property
     def pp_cur(self):
         """The current value for this move's power points."""
         return self._move_info["pp_cur"]
@@ -202,7 +194,8 @@ class Move:
             raise ValueError("Error reading move information: "
                              f"{move_info["name"]}")
 
-        move_info["pp_up"] = 0
+        self._pp_up = 0
+        self._base_pp_max = move_info["pp_max"]
         move_info["pp_cur"] = move_info["pp_max"]
         self._move_info = move_info
 
@@ -235,8 +228,19 @@ class Move:
             source_pokemon, target_pokemon, field)
         return status_code
 
-    def _set_effect(self, effect, effect_rate):
-        """Set the effect for this move."""
-        ###--TO DO--###
-        # add code to properly set an effect to the move
-        pass
+    def pp_up(self, amount):
+        """Increase the max power points of this move a certain amount of times.
+
+        amount should be an integer. Integers less than 1 are ignored, and any
+        greater than 3 are treated as 3. Note that the maximum amount of times
+        a move's pp can be raised is 3 times. For each time a move's max pp has
+        increased, it will increase by 1/5th of its base value.
+        """
+        if amount > 3:
+            amount = 3
+
+        while self._pp_up < 3 and amount > 0:
+            increase = self._base_pp_max / 5
+            self._move_info["pp_max"] += increase
+            self._pp_up += 1
+            amount -= 1
