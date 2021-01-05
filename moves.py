@@ -29,27 +29,8 @@ class Move:
 
     ########## Properties ##########
     @property
-    def name(self):
-        """The name of the move."""
-        return self._move_info["name"]
-
-    @property
-    def type(self):
-        """The type of the move."""
-        return self._move_info["type"]
-
-    @property
-    def category(self):
-        """The category of the move.
-
-        Valid categories include: physical, special, other.
-        """
-        return self._move_info["category"]
-
-    @property
-    def pp_max(self):
-        """The maximum value for this move's power points."""
-        return self._move_info["pp_max"]
+    def move_info(self):
+        return move_info.copy()
 
     @property
     def pp_cur(self):
@@ -61,128 +42,6 @@ class Move:
         if value > self._move_info["pp_max"] or value < 0:
             raise ValueError(f"Improper value for current pp: {value}")
         self._move_info["pp_cur"] = value
-
-    @property
-    def base_power(self):
-        """The base power for this move.
-
-        Moves that do not deal damage will have a base power of None.
-        """
-        return self._move_info["base_power"]
-
-    @property
-    def accuracy(self):
-        """The accuracy for this move.
-
-        Moves that cannot miss will have an accuracy of None.
-        """
-        return self._move_info["accuracy"]
-
-    @property
-    def flavor_text(self):
-        """The simple description for this move."""
-        return self._move_info["flavor_text"]
-
-    @property
-    def effect(self):
-        """The effect that may be applied by this move.
-
-        Moves that do not have additional effects will have an effect of None.
-        """
-        ###--TO DO--###
-        # add code to properly set an effect to the move
-        # should return a tuple of 2 items; the name of the effect and a
-        # function used to apply the effect to a target
-        return self._move_info["effect"]
-
-    @property
-    def effect_rate(self):
-        """The chance that the additional effect will occur, if present.
-
-        If this move has no additional effect or if the effect cannot fail,
-        this property will be None
-        """
-        return self._move_info["effect_rate"]
-
-    @property
-    def cit_ratio(self):
-        """The chance this damaging move will deal critical damage.
-
-        Moves that cannot deal critical damage will have a critical ratio of
-        sNone.
-        """
-        return self._move_info["cit_ratio"]
-
-    @property
-    def priority(self):
-        """The speed priority for this move.
-
-        Moves with a higher priority will always go before one with lower
-        priorirty. If both moves have the same priority, the pokemon with the
-        higher speed stat will act first.
-        """
-        return self._move_info["priority"]
-
-    @property
-    def target(self):
-        """The target of this move.
-
-        Suitable values for a target are:
-        self, single_adjacent_foe, single_adjacent_any, single_adjacent_ally,
-        single_any, user_or_adjacent_ally, all_adjacent_foe, all_adjacent_any,
-        all_foes, field, team, special.
-        """
-        return self._move_info["target"]
-
-    @property
-    def contact(self):
-        """Whether the move makes physical contact with its target."""
-        return self._move_info["contact"]
-
-    @property
-    def sound(self):
-        """Whether the move utilizes sound."""
-        return self._move_info["sound"]
-
-    @property
-    def punch(self):
-        """Whether the move is a punch."""
-        return self._move_info["punch"]
-
-    @property
-    def biting(self):
-        """Whether the move is a biting move."""
-        return self._move_info["biting"]
-
-    @property
-    def snatchable(self):
-        """Whether the move is snatchable."""
-        return self._move_info["snatchable"]
-
-    @property
-    def gravity(self):
-        """Whether the move is affected by gravity."""
-        return self._move_info["gravity"]
-
-    @property
-    def defrost(self):
-        """Whether the move defrosts the pokemon if it is frozen."""
-        return self._move_info["defrost"]
-
-    @property
-    def reflectable(self):
-        """Whether the move can be reflected by magic coat or magic bounce."""
-        return self._move_info["reflectable"]
-
-    @property
-    def blockable(self):
-        """Whether the move can be blocked by protect or detect."""
-        return self._move_info["blockable"]
-
-    @property
-    def copyable(self):
-        """Whether the move can be copied by mirror move."""
-        return self._move_info["copyable"]
 
 
     ########## Class/Static Methods ##########
@@ -205,7 +64,7 @@ class Move:
         If a pokemon uses a move on itself, both the source and target pokemon
         should be the same object. Any effects on the field that may alter the
         move will be applied. A numerical status code will be returned to
-        signify the result of the move. Code are as follows:
+        signify the result of the move. Codes are as follows:
             0  - the move succeeded normally
             1  - the damaging move has scored a critical hit
             2  - the damaging move has scored a critical hit due to affection
@@ -240,7 +99,7 @@ class Move:
             amount = 3
 
         while self._pp_up < 3 and amount > 0:
-            increase = self._base_pp_max / 5
+            increase = self._base_pp_max // 5
             self._move_info["pp_max"] += increase
             self._pp_up += 1
             amount -= 1

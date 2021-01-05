@@ -19,7 +19,7 @@ def apply_move(move_info, source_pokemon, target_pokemon, field):
     If a pokemon uses a move on itself, both the source and target pokemon
     should be the same object. Any effects on the field that may alter the
     move will be applied. A numerical status code will be returned to
-    signify the result of the move. Code are as follows:
+    signify the result of the move. Codes are as follows:
         0  - the move succeeded normally
         1  - the damaging move has scored a critical hit
         2  - the damaging move has scored a critical hit due to affection
@@ -37,6 +37,11 @@ def apply_move(move_info, source_pokemon, target_pokemon, field):
         13 - the move failed due to the target blocking the move
         14 - the move failed due to the source's disobedience
         15 - the move failed due to some other factor
+
+    The actual move_info attribute of a Move object needs to be passed to this
+    function, not a copy, in order to apply accurate changes to the current pp
+    of the move due to various abilities or other effects on the field. As
+    such, this function should only be called directly by a Move object.
     """
     ###--TO DO--###
     # add code to apply the move
