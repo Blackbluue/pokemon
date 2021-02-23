@@ -4,14 +4,15 @@
 class Pokemon:
     """Class to define a single pokemon."""
 
-    def __init__(self, natl_id, region, name, types, stats, moves, happiness=0,
-                 ivs=None, shiny=None, level=1, ot=None, ot_id=None):
+    def __init__(self, natl_id, location, name, types, stats, moves, ability,
+                 happiness=0, ivs=None, shiny=None, level=1, ot=None,
+                 ot_id=None, nicknamed=False):
         """Initialize a single Pokemon.
 
         Keyword arguments:
         natl_id   -- the national pokedex id of the pokemon
-        region    -- a tuple containining the region name and regional pokedex
-                     id of the pokemon
+        location  -- the location code where the pokemon was first encountered
+                     by its original trainer
         name      -- the name of the pokemon, or nickname if it has one
         types     -- an iterable of the type(s) of the pokemon. Can be at most
                      2 types, but must still be an iterable even if only 1 type
@@ -48,15 +49,13 @@ class Pokemon:
         """
 
         self._natl_id = id
-        ###--TO DO--###
-        # region id should be pulled from pokedex class based of given region
-        self._region, self._region_id = *region
+        self._location = location
         ###--TO DO--###
         # make a trainer class
         self._original_trainer = ot
         self._original_trainer_id = ot_id
-        self.name = name
-        self.level = level
+        self._name = name
+        self._level = level
         ###--TO DO--###
         # types should be pulled from pokedex entry for consistency
         for poke_type in types:
@@ -100,17 +99,25 @@ class Pokemon:
     ########## Properties ##########
     @property
     def natl_id(self):
-        """The national pokedex id of the pokemon."""
+        """The national pokedex id of the pokemon.
+
+        The national pokedex id of a pokemon is a defining unique number for
+        that pokemon, and is not tied to a specific region; no two different
+        pokemon species may have the same national id regardless of where it was
+        encountered
+        """
         return self._natl_id
 
     @property
-    def region(self):
-        """The region the pokemon was originally encountered."""
-        return self._region
-
-    @property
     def region_id(self):
-        """The regional pokedex id of the pokemon."""
+        """The regional pokedex id of the pokemon.
+
+        The regional pokedex id is similar to the national id, except that the
+        same pokemon species may have different regional ids depending on which
+        regional pokedex is being searched. The regional id returned from this
+        property is dependent on where the trainer that currently owns this
+        pokemon is in the pokemon world.
+        """
         return self._region_id
 
     @property
@@ -134,6 +141,20 @@ class Pokemon:
         return self._original_trainer_id
 
     @property
+    def location(self):
+        """Where the pokemon was first encountered by its original trainer.
+
+        This is a location code that defines a specific locale within the
+        pokemon world where this pokemon was first encountered by its original
+        trainer. This code may not be human readable; the human readable name
+        can be obtained by using this code with the PokeEarth interface.
+
+        This locale is in refernce to the original trainer of this pokemon, not
+        the currently owning trainer. Should be left None for wild pokemon.
+        """
+        return self._location
+
+    @property
     def name(self):
         """The name of the pokemon, or nickname if it has one."""
         return self._name
@@ -144,7 +165,11 @@ class Pokemon:
 
     @property
     def level(self):
-        """The current level of the pokemon. Must be between 1 and 100 inclusive."""
+        """The current level of the pokemon.
+
+        The level of a pokemon is a rough estimation of the overal power of
+        that pokemon. The level must be between 1 and 100 inclusive.
+        """
         return self._level
 
     @level.setter
