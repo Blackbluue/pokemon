@@ -1,3 +1,4 @@
+import copy
 import csv
 
 
@@ -17,8 +18,20 @@ class Pokedex:
         except TypeError:
             # dex_file is a file-like object
             reader = csv.DictReader(dex_file)
-        self._parse_info(reader)
+        self._dex_list = self._parse_info(reader)
         dex_entries = dict()
+
+    def _parse_info(self, reader):
+        """Parser to read a Pokedex File.
+        
+        :param reader: the DictReader that contains the info on the Pokedex.
+        :type reader: class:'csv.DictReader'
+
+        :return: A list of :class:'pokedex.DexEntry' objects containing all
+            the Pokedex info from the file.
+        :rtype: list
+        """
+        pass
 
 
 class DexEntry:
@@ -26,9 +39,9 @@ class DexEntry:
 
     def __init__(self, info):
         """Constructor for a single Pokedex entry."""
-        self._name = info["name"]
+        self._dex_info = info
 
     @property
-    def name(self):
-        """The name of this species of pokemon."""
-        return self._name
+    def dex_info(self):
+        """The collected information on this pokedex entry."""
+        return copy.deepcopy(self._dex_info)
