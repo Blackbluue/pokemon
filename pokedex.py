@@ -4,6 +4,9 @@ import csv
 
 class Pokedex:
     """Interface for a Pokedex"""
+    ###--TO DO--###
+    # make Pokedex class act like a dict object
+    
 
     def __init__(self, dex_file):
         """Constructor for the Pokedex class.
@@ -18,8 +21,7 @@ class Pokedex:
         except TypeError:
             # dex_file is a file-like object
             reader = csv.DictReader(dex_file)
-        self._dex_list = self._parse_info(reader)
-        dex_entries = dict()
+        self._dex_dict = self._parse_info(reader)
 
     def _parse_info(self, reader):
         """Parser to read a Pokedex File.
@@ -27,11 +29,15 @@ class Pokedex:
         :param reader: the DictReader that contains the info on the Pokedex.
         :type reader: class:'csv.DictReader'
 
-        :return: A list of :class:'pokedex.DexEntry' objects containing all
-            the Pokedex info from the file.
-        :rtype: list
+        :return: A dict of id keys and :class:'pokedex.DexEntry' object values
+            containing all the Pokedex info from the file.
+        :rtype: dict
         """
-        pass
+        dex_dict = dict()
+        for row in reader:
+            dex_dict[row["number"]] = (DexEntry(row))
+        return dex_dict
+
 
 
 class DexEntry:
@@ -45,3 +51,14 @@ class DexEntry:
     def dex_info(self):
         """The collected information on this pokedex entry."""
         return copy.deepcopy(self._dex_info)
+
+    @property
+    def owned(self):
+        """Whether the pokemon has been seen, caught, or is unknown."""
+        return self._dex_info["owned"]
+
+    @owned.setter
+    def owned(self, status):
+        if status.lower() not in ["unknown", "seen", "owned"]:
+            raise ValueError("Improper value for 'owned' attribute.")
+        self._dex_info["owned"] = status.lower()
