@@ -6,6 +6,8 @@ class Pokedex:
     """Interface for a Pokedex"""
     ###--TO DO--###
     # make Pokedex class act like a dict object
+    # make sorted views of Pokedex
+    # make filter methods
     
 
     def __init__(self, dex_file):
@@ -38,7 +40,32 @@ class Pokedex:
             dex_dict[row["number"]] = (DexEntry(row))
         return dex_dict
 
+    def __len__(self):
+        """The size of the Pokedex."""
+        return len(self._dex_dict)
+    
+    def __getitem__(self, key):
+        """Retrieve the Pokedex entry with the specified key.
+        
+        Although key must be a string, they should consist of a
+        single integer value, possibly with an optional variant
+        tag in the form of int:var_tag
 
+        :param key: the id of the requested Pokedex file.
+        :type key: str
+
+        :return: The requested Pokedex entry.
+        :rtype: :class:'pokedex.DexEntry'
+        """
+        return self._dex_dict[key]
+
+    def __iter__(self):
+        """The iterator for the Pokdex"""
+        return iter(self._dex_dict)
+
+    def __contains__(self, item):
+        """True if an entry with the specified id exists; otherwise false."""
+        return True if item in self._dex_dict else False
 
 class DexEntry:
     """A single entry for a Pokemon in a Pokedex."""
