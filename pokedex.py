@@ -1,16 +1,52 @@
 import copy
 import csv
+from operator import itemgetter
 
 
 class Pokedex:
     """Interface for a Pokedex"""
     ###--TO DO--###
     # make sorted views of Pokedex
-    # name, type, id, classification, height, weight, cap_rate, egg cycles,
+    # height, weight, cap_rate, egg cycles,
     # exp yield, exp growth rate, happiness, total stats, total evs,
     # egg groups, evolution chain, owned
     # make filter methods
     
+    # Sorting keys
+    NAME = 0
+    TYPE = 1
+    NUMBER = 2
+    CLASSIFICATION = 3
+    HEIGHT = 4
+    WEIGHT = 5
+    CAPTURE_RATE = 6
+    EGG_CYCLES = 7
+    ABILITIES = 8
+    EXP_YIELD = 9
+    EXP_GROWTH_RATE = 10
+    HAPPINESS = 11
+    STATS_TOTAL = 12
+    STATS_HP = 13
+    STATS_ATK = 14
+    STATS_DEF = 15
+    STATS_SP_ATK = 16
+    STATS_SP_DEF = 17
+    STATS_SPD = 18
+    EV_TOTAL = 19
+    EV_HP = 20
+    EV_ATK = 21
+    EV_DEF = 22
+    EV_SP_ATK = 23
+    EV_SP_DEF = 24
+    EV_SPD = 25
+    EGG_GROUPS = 26
+    EVOLUTION = 27
+    OWNED = 28
+
+    # Filtering keys
+    # all sort keys also function as filter keys
+    ABILITIES_SECOND = 29
+    ABILITIES_HIDDEN = 30
 
     def __init__(self, dex_file):
         """Constructor for the Pokedex class.
@@ -69,7 +105,94 @@ class Pokedex:
         """True if an entry with the specified id exists; otherwise false."""
         return True if item in self._dex_dict else False
 
-    
+    def sort_name(self, reverse=False):
+        """Return an iterator containing DexEntry ids from this Pokdex,
+        sorted alphabetically by the name of each pokemon.
+
+        :param reverse: A boolean value. If set to True, then the
+            elements are sorted reverse alphabetical order.
+        :type reverse: bool, optional
+        
+        :return: An iterator of this DexEntry ids.
+        :rtype: iter
+        """
+        entries = sorted(self._dex_dict.values(), key=itemgetter("name"), reverse=reverse)
+        return iter([entry["number"] for entry in entries])
+
+    def sort_type(self, reverse=False):
+        """Return an iterator containing DexEntry ids from this Pokdex,
+        sorted by the type of each pokemon.
+
+        :param reverse: A boolean value. If set to True, then the
+            elements are sorted reverse order.
+        :type reverse: bool, optional
+        
+        :return: An iterator of this DexEntry ids.
+        :rtype: iter
+        """
+        entries = sorted(self._dex_dict.values(), key=itemgetter("type"), reverse=reverse)
+        return iter([entry["number"] for entry in entries])
+
+    def sort_classification(self, reverse=False):
+        """Return an iterator containing DexEntry ids from this Pokdex,
+        sorted by the classification of each pokemon.
+
+        :param reverse: A boolean value. If set to True, then the
+            elements are sorted reverse order.
+        :type reverse: bool, optional
+        
+        :return: An iterator of this DexEntry ids.
+        :rtype: iter
+        """
+        entries = sorted(self._dex_dict.values(), key=itemgetter("classification"), reverse=reverse)
+        return iter([entry["number"] for entry in entries])
+
+    def sort_height(self, reverse=False):
+        """Return an iterator containing DexEntry ids from this Pokdex,
+        sorted by the height of each pokemon.
+
+        :param reverse: A boolean value. If set to True, then the
+            elements are sorted reverse order.
+        :type reverse: bool, optional
+        
+        :return: An iterator of this DexEntry ids.
+        :rtype: iter
+        """
+        entries = sorted(self._dex_dict.values(), key=itemgetter("height"), reverse=reverse)
+        return iter([entry["number"] for entry in entries])
+   
+    def sort_weight(self, reverse=False):
+        """Return an iterator containing DexEntry ids from this Pokdex,
+        sorted by the weight of each pokemon.
+
+        :param reverse: A boolean value. If set to True, then the
+            elements are sorted reverse order.
+        :type reverse: bool, optional
+        
+        :return: An iterator of this DexEntry ids.
+        :rtype: iter
+        """
+        entries = sorted(self._dex_dict.values(), key=itemgetter("weight"), reverse=reverse)
+        return iter([entry["number"] for entry in entries])
+
+    def sort_capture_rate(self, reverse=False):
+        """Return an iterator containing DexEntry ids from this Pokdex,
+        sorted by the capture_rate of each pokemon.
+
+        :param reverse: A boolean value. If set to True, then the
+            elements are sorted reverse order.
+        :type reverse: bool, optional
+        
+        :return: An iterator of this DexEntry ids.
+        :rtype: iter
+        """
+        entries = sorted(self._dex_dict.values(), key=itemgetter("capture_rate"), reverse=reverse)
+        return iter([entry["number"] for entry in entries])
+
+    def sorted(self, key, reverse):
+        """Return an iterator containing id number/DexEntry pairs for entries
+        in this Pokedex."""
+        pass
 class DexEntry:
     """A single entry for a Pokemon in a Pokedex."""
 
