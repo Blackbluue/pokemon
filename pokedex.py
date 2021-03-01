@@ -105,34 +105,6 @@ class Pokedex:
         """True if an entry with the specified id exists; otherwise false."""
         return True if item in self._dex_dict else False
    
-    def sort_weight(self, reverse=False):
-        """Return an iterator containing DexEntry ids from this Pokdex,
-        sorted by the weight of each pokemon.
-
-        :param reverse: A boolean value. If set to True, then the
-            elements are sorted reverse order.
-        :type reverse: bool, optional
-        
-        :return: An iterator of this DexEntry ids.
-        :rtype: iter
-        """
-        entries = sorted(self._dex_dict.values(), key=itemgetter("weight"), reverse=reverse)
-        return iter([entry["number"] for entry in entries])
-
-    def sort_capture_rate(self, reverse=False):
-        """Return an iterator containing DexEntry ids from this Pokdex,
-        sorted by the capture_rate of each pokemon.
-
-        :param reverse: A boolean value. If set to True, then the
-            elements are sorted reverse order.
-        :type reverse: bool, optional
-        
-        :return: An iterator of this DexEntry ids.
-        :rtype: iter
-        """
-        entries = sorted(self._dex_dict.values(), key=itemgetter("capture_rate"), reverse=reverse)
-        return iter([entry["number"] for entry in entries])
-
     def sorted(self, key, reverse=False):
         """Return an iterator containing id number/DexEntry pairs for entries
         in this Pokedex.
@@ -174,35 +146,41 @@ class Pokedex:
             sort_key = lambda entry: sum(entry["base_stats"].values())
             return self._sort_simple(sort_key, reverse)
         elif key == self.STATS_HP:
-            return self._sort_simple(itemgetter("stats_hp"), reverse)
+            return self._sort_simple(lambda entry: entry["base_stats"]["hp"], reverse)
         elif key == self.STATS_ATK:
-            return self._sort_simple(itemgetter("stats_atk"), reverse)
+            return self._sort_simple(lambda entry: entry["base_stats"]["attack"], reverse)
         elif key == self.STATS_DEF:
-            return self._sort_simple(itemgetter("stats_def"), reverse)
+            return self._sort_simple(lambda entry: entry["base_stats"]["defense"], reverse)
         elif key == self.STATS_SP_ATK:
-            return self._sort_simple(itemgetter("stats_sp_atk"), reverse)
+            return self._sort_simple(lambda entry: entry["base_stats"]["sp_attack"], reverse)
         elif key == self.STATS_SP_DEF:
-            return self._sort_simple(itemgetter("stats_sp_def"), reverse)
+            return self._sort_simple(lambda entry: entry["base_stats"]["sp_defense"], reverse)
         elif key == self.STATS_SPD:
-            return self._sort_simple(itemgetter("stats_spd"), reverse)
+            return self._sort_simple(lambda entry: entry["base_stats"]["speed"], reverse)
         elif key == self.EV_TOTAL:
             sort_key = lambda entry: sum(entry["evs"].values())
             return self._sort_simple(sort_key, reverse)
         elif key == self.EV_HP:
-            return self._sort_simple(itemgetter("ev_hp"), reverse)
+            return self._sort_simple(lambda entry: entry["evs"]["hp"], reverse)
         elif key == self.EV_ATK:
-            return self._sort_simple(itemgetter("ev_atk"), reverse)
+            return self._sort_simple(lambda entry: entry["evs"]["attack"], reverse)
         elif key == self.EV_DEF:
-            return self._sort_simple(itemgetter("ev_def"), reverse)
+            return self._sort_simple(lambda entry: entry["evs"]["defense"], reverse)
         elif key == self.EV_SP_ATK:
-            return self._sort_simple(itemgetter("ev_sp_atk"), reverse)
+            return self._sort_simple(lambda entry: entry["evs"]["sp_attack"], reverse)
         elif key == self.EV_SP_DEF:
-            return self._sort_simple(itemgetter("ev_sp_def"), reverse)
+            return self._sort_simple(lambda entry: entry["evs"]["sp_defense"], reverse)
         elif key == self.EV_SPD:
-            return self._sort_simple(itemgetter("ev_spd"), reverse)
+            return self._sort_simple(lambda entry: entry["evs"]["speed"], reverse)
+        elif key == self.EGG_GROUPS:
+            return self._sort_simple(itemgetter("egg_groups"), reverse)
+        elif key == self.EVOLUTION:  # not finished
+            return self._sort_simple(itemgetter("exp_yield"), reverse)
+        elif key == self.OWNED:
+            return self._sort_simple(itemgetter("owned"), reverse)
 
     def _sort_simple(key, reverse=False):
-        """Internal method for sorting Pokedex on text based fields. Supply
+        """Internal method for sorting Pokedex on simple fields. Supply
         a function key to specify which field to sort on.
         
         :param key: Single argument function that when supplied a
@@ -213,6 +191,19 @@ class Pokedex:
         """
         entries = sorted(self._dex_dict.values(), key=key,  reverse=reverse)
         return iter([(value["number"], value) for value in entries])
+
+    def _sort_(reverse=False):
+        """Internal method for sorting Pokedex on evolution.
+        
+        :param reverse: A boolean value. If set to True, then the
+            elements are sorted in reverse order.
+        :type reverse: bool, optional
+        """
+        entries = sorted(self._dex_dict.values(), key=itemgetter("number"),  reverse=reverse)
+
+        for entry in entries:
+            pass
+
 
 class DexEntry:
     """A single entry for a Pokemon in a Pokedex."""
