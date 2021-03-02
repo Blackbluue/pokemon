@@ -165,20 +165,15 @@ class Pokedex:
         elif field == self.EV_SP_ATK:
             return lambda entry: entry["evs"]["sp_attack"]
         elif field == self.EV_SP_DEF:
-            return lambda entry: entry["number"]
-            return self._sort_simple(lambda entry: entry["evs"]["sp_defense"], reverse)
+            return lambda entry: entry["evs"]["sp_defense"]
         elif field == self.EV_SPD:
-            return lambda entry: entry["number"]
-            return self._sort_simple(lambda entry: entry["evs"]["speed"], reverse)
+            return lambda entry: entry["evs"]["speed"]
         elif field == self.EGG_GROUPS:
-            return lambda entry: entry["number"]
-            return self._sort_simple(itemgetter("egg_groups"), reverse)
+            return lambda entry: entry["egg_groups"]
         elif field == self.EVOLUTION:  # not finished
-            return lambda entry: entry["number"]
-            return self._sort_simple(itemgetter("exp_yield"), reverse)
+            return lambda entry: entry["evolve_to"]
         elif field == self.OWNED:
-            return lambda entry: entry["number"]
-            return self._sort_simple(itemgetter("owned"), reverse)
+            return lambda entry: entry["owned"]
 
     def sort(self, key, reverse=False):
         """Sort the entries of this Pokedex based on the given sort key.
@@ -192,40 +187,19 @@ class Pokedex:
             elements are sorted in reverse order.
         :type reverse: bool, optional
         """
-        sort_key = self._search_key(key)
-        self.dex_view.sort(key=sort_key,  reverse=reverse)
+        if key == EVOLUTION:
+            pass
+        else:
+            sort_key = self._search_key(key)
+            self.dex_view.sort(key=sort_key,  reverse=reverse)
 
     def results(self):
         """Return the current state of this Pokedex, with sorting and filtering.
+
         :return: The current state of this Pokedex. It is immutable.
         :rtype: list
         """
         pass
-
-    def _sort_simple(key, reverse=False):
-        """Internal method for sorting Pokedex on simple fields. Supply
-        a function key to specify which field to sort on.
-        
-        :param key: Single argument function that when supplied a
-            :class:'pokedex.DexEntry' will return a value used for sorting.
-        :param reverse: A boolean value. If set to True, then the
-            elements are sorted in reverse order.
-        :type reverse: bool, optional
-        """
-        self.dex_view.sort(key=key,  reverse=reverse)
-        # return iter([(value["number"], value) for value in entries])
-
-    def _sort_(reverse=False):
-        """Internal method for sorting Pokedex on evolution.
-        
-        :param reverse: A boolean value. If set to True, then the
-            elements are sorted in reverse order.
-        :type reverse: bool, optional
-        """
-        entries = sorted(self._dex_dict.values(), key=itemgetter("number"),  reverse=reverse)
-
-        for entry in entries:
-            pass
 
 
 class DexEntry:
