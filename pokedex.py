@@ -61,7 +61,7 @@ class Pokedex:
         except TypeError:
             # dex_file is a file-like object
             reader = DictReader(dex_file)
-        self._dex_dict = self._parse_info(reader)
+        self._dex_dict, self._dex_view = self._parse_info(reader)
 
     def _parse_info(self, reader):
         """Parser to read a Pokedex File.
@@ -69,14 +69,17 @@ class Pokedex:
         :param reader: the DictReader that contains the info on the Pokedex.
         :type reader: class:'csv.DictReader'
 
-        :return: A dict of id keys and :class:'pokedex.DexEntry' object values
-            containing all the Pokedex info from the file.
-        :rtype: dict
+        :return: A tuple of a dict of id keys and :class:'pokedex.DexEntry'
+            object values containing all the Pokedex info from the file,
+            and a list containing only the id numbers of each entry.
+        :rtype: tuple of (dict, list)
         """
         dex_dict = dict()
+        dex_view = list()
         for row in reader:
             dex_dict[row["number"]] = DexEntry(row)
-        return dex_dict
+            dex_view.append(row["number"])
+        return dex_dict, dex_view
 
     def __len__(self):
         """The size of the Pokedex."""
@@ -105,79 +108,99 @@ class Pokedex:
         """True if an entry with the specified id exists; otherwise false."""
         return True if item in self._dex_dict else False
    
-    def sorted(self, key, reverse=False):
-        """Return an iterator containing id number/DexEntry pairs for entries
-        in this Pokedex.
+    def _search_key(field):
+        """Internal method for building a sort/filter key.
+        :param field: Flag signifiying which field to use for data look up.
+
+        :return: A single argument function that takes in one
+            :class:'pokedex.DexEntry' object and returns the data in the field
+            specified by ``field``
+        """
+        if field == self.NAME:
+            return lambda entry: entry["name"]["English"]
+        elif field == self.TYPE:
+            return lambda entry: entry["type"]
+        elif field == self.NUMBER:  # default sort order
+            return lambda entry: entry["number"]
+        elif field == self.CLASSIFICATION:
+            return lambda entry: entry["classification"]
+        elif field == self.HEIGHT:
+            return lambda entry: entry["height"]
+        elif field == self.WEIGHT:
+            return lambda entry: entry["weight"]
+        elif field == self.CAPTURE_RATE:
+            return lambda entry: entry["capture_rate"]
+        elif field == self.EGG_CYCLES:
+            return lambda entry: entry["base_egg_cycles"]
+        elif field == self.ABILITIES:
+            return lambda entry: entry["abilities"]
+        elif field == self.EXP_YIELD:
+            return lambda entry: entry["exp_yield"]
+        elif field == self.EXP_GROWTH_RATE:
+            return lambda entry: entry["experience_growth"]
+        elif field == self.HAPPINESS:
+            return lambda entry: entry["happiness"]
+        elif field == self.STATS_TOTAL:
+            return lambda entry: sum(entry["base_stats"].values())
+        elif field == self.STATS_HP:
+            return lambda entry: entry["base_stats"]["hp"]
+        elif field == self.STATS_ATK:
+            return lambda entry: entry["base_stats"]["attack"]
+        elif field == self.STATS_DEF:
+            return lambda entry: entry["base_stats"]["defense"]
+        elif field == self.STATS_SP_ATK:
+            return lambda entry: entry["base_stats"]["sp_attack"]
+        elif field == self.STATS_SP_DEF:
+            return lambda entry: entry["base_stats"]["sp_defense"]
+        elif field == self.STATS_SPD:
+            return lambda entry: entry["base_stats"]["speed"]
+        elif field == self.EV_TOTAL:
+            return lambda entry: sum(entry["evs"].values())
+        elif field == self.EV_HP:
+            return lambda entry: entry["evs"]["hp"]
+        elif field == self.EV_ATK:
+            return lambda entry: entry["evs"]["attack"]
+        elif field == self.EV_DEF:
+            return lambda entry: entry["evs"]["defense"]
+        elif field == self.EV_SP_ATK:
+            return lambda entry: entry["evs"]["sp_attack"]
+        elif field == self.EV_SP_DEF:
+            return lambda entry: entry["number"]
+            return self._sort_simple(lambda entry: entry["evs"]["sp_defense"], reverse)
+        elif field == self.EV_SPD:
+            return lambda entry: entry["number"]
+            return self._sort_simple(lambda entry: entry["evs"]["speed"], reverse)
+        elif field == self.EGG_GROUPS:
+            return lambda entry: entry["number"]
+            return self._sort_simple(itemgetter("egg_groups"), reverse)
+        elif field == self.EVOLUTION:  # not finished
+            return lambda entry: entry["number"]
+            return self._sort_simple(itemgetter("exp_yield"), reverse)
+        elif field == self.OWNED:
+            return lambda entry: entry["number"]
+            return self._sort_simple(itemgetter("owned"), reverse)
+
+    def sort(self, key, reverse=False):
+        """Sort the entries of this Pokedex based on the given sort key.
+        After sorting, the results can be retrieved with
+        ``pokedex.Pokedex.results()``.
+
         :param key: Specifies on what criteria to sort the Pokedex.
             Identity values are supplied as constants in this class, and can
             be found in the documentation.
         :param reverse: A boolean value. If set to True, then the
             elements are sorted in reverse order.
         :type reverse: bool, optional
-
-        :return: An iterator of this Pokdex's items.
-        :rtype: iter
         """
-        if key == self.NAME:
-            return self._sort_simple(lambda entry: entry["name"]["English"], reverse)
-        elif key == self.TYPE:
-            return self._sort_simple(itemgetter("type"), reverse)
-        elif key == self.NUMBER:  # default sort order
-            return self._sort_simple(itemgetter("number"), reverse)
-        elif key == self.CLASSIFICATION:
-            return self._sort_simple(itemgetter("classification"), reverse)
-        elif key == self.HEIGHT:
-            return self._sort_simple(itemgetter("height"), reverse)
-        elif key == self.WEIGHT:
-            return self._sort_simple(itemgetter("weight"), reverse)
-        elif key == self.CAPTURE_RATE:
-            return self._sort_simple(itemgetter("capture_rate"), reverse)
-        elif key == self.EGG_CYCLES:
-            return self._sort_simple(itemgetter("base_egg_cycles"), reverse)
-        elif key == self.ABILITIES:
-            return self._sort_simple(itemgetter("abilities"), reverse)
-        elif key == self.EXP_YIELD:
-            return self._sort_simple(itemgetter("exp_yield"), reverse)
-        elif key == self.EXP_GROWTH_RATE:
-            return self._sort_simple(itemgetter("experience_growth"), reverse)
-        elif key == self.HAPPINESS:
-            return self._sort_simple(itemgetter("happiness"), reverse)
-        elif key == self.STATS_TOTAL:
-            sort_key = lambda entry: sum(entry["base_stats"].values())
-            return self._sort_simple(sort_key, reverse)
-        elif key == self.STATS_HP:
-            return self._sort_simple(lambda entry: entry["base_stats"]["hp"], reverse)
-        elif key == self.STATS_ATK:
-            return self._sort_simple(lambda entry: entry["base_stats"]["attack"], reverse)
-        elif key == self.STATS_DEF:
-            return self._sort_simple(lambda entry: entry["base_stats"]["defense"], reverse)
-        elif key == self.STATS_SP_ATK:
-            return self._sort_simple(lambda entry: entry["base_stats"]["sp_attack"], reverse)
-        elif key == self.STATS_SP_DEF:
-            return self._sort_simple(lambda entry: entry["base_stats"]["sp_defense"], reverse)
-        elif key == self.STATS_SPD:
-            return self._sort_simple(lambda entry: entry["base_stats"]["speed"], reverse)
-        elif key == self.EV_TOTAL:
-            sort_key = lambda entry: sum(entry["evs"].values())
-            return self._sort_simple(sort_key, reverse)
-        elif key == self.EV_HP:
-            return self._sort_simple(lambda entry: entry["evs"]["hp"], reverse)
-        elif key == self.EV_ATK:
-            return self._sort_simple(lambda entry: entry["evs"]["attack"], reverse)
-        elif key == self.EV_DEF:
-            return self._sort_simple(lambda entry: entry["evs"]["defense"], reverse)
-        elif key == self.EV_SP_ATK:
-            return self._sort_simple(lambda entry: entry["evs"]["sp_attack"], reverse)
-        elif key == self.EV_SP_DEF:
-            return self._sort_simple(lambda entry: entry["evs"]["sp_defense"], reverse)
-        elif key == self.EV_SPD:
-            return self._sort_simple(lambda entry: entry["evs"]["speed"], reverse)
-        elif key == self.EGG_GROUPS:
-            return self._sort_simple(itemgetter("egg_groups"), reverse)
-        elif key == self.EVOLUTION:  # not finished
-            return self._sort_simple(itemgetter("exp_yield"), reverse)
-        elif key == self.OWNED:
-            return self._sort_simple(itemgetter("owned"), reverse)
+        sort_key = self._search_key(key)
+        self.dex_view.sort(key=sort_key,  reverse=reverse)
+
+    def results(self):
+        """Return the current state of this Pokedex, with sorting and filtering.
+        :return: The current state of this Pokedex. It is immutable.
+        :rtype: list
+        """
+        pass
 
     def _sort_simple(key, reverse=False):
         """Internal method for sorting Pokedex on simple fields. Supply
@@ -189,8 +212,8 @@ class Pokedex:
             elements are sorted in reverse order.
         :type reverse: bool, optional
         """
-        entries = sorted(self._dex_dict.values(), key=key,  reverse=reverse)
-        return iter([(value["number"], value) for value in entries])
+        self.dex_view.sort(key=key,  reverse=reverse)
+        # return iter([(value["number"], value) for value in entries])
 
     def _sort_(reverse=False):
         """Internal method for sorting Pokedex on evolution.
