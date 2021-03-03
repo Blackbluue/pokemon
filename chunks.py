@@ -1,9 +1,11 @@
 from random import randint
 
-def insertion_sort(array, left=0, right=None):
+def insertion_sort(array, left=0, right=None, comp_key=None):
     if right is None:
         right = len(array) - 1
 
+    if comp_key == None:
+        comp_key = lambda elem1, elem2: elem1 > elem2
     # Loop from the element indicated by
     # `left` until the element indicated by `right`
     for i in range(left + 1, right + 1):
@@ -20,7 +22,8 @@ def insertion_sort(array, left=0, right=None):
         # portion of the array) and find the correct position
         # of the element referenced by `key_item`. Do this only
         # if the `key_item` is smaller than its adjacent values.
-        while j >= left and array[j] > key_item:
+        # while j >= left and array[j] > key_item:
+        while j >= left and comp_key(array[j], key_item):
             # Shift the value one position to the left
             # and reposition `j` to point to the next element
             # (from right to left)
@@ -33,7 +36,7 @@ def insertion_sort(array, left=0, right=None):
 
     return array
 
-def merge(left, right):
+def merge(left, right, comp_key=None):
     # If the first array is empty, then nothing needs
     # to be merged, and you can return the second array as the result
     if len(left) == 0:
@@ -44,6 +47,8 @@ def merge(left, right):
     if len(right) == 0:
         return left
 
+    if comp_key == None:
+        comp_key = lambda elem1, elem2: elem1 > elem2
     result = []
     index_left = index_right = 0
 
@@ -53,7 +58,8 @@ def merge(left, right):
         # The elements need to be sorted to add them to the
         # resultant array, so you need to decide whether to get
         # the next element from the first or the second array
-        if left[index_left] <= right[index_right]:
+        # if left[index_left] <= right[index_right]:
+        if comp_key(right[index_right], left[index_left]):
             result.append(left[index_left])
             index_left += 1
         else:
@@ -73,7 +79,7 @@ def merge(left, right):
 
     return result
 
-def timsort(array):
+def timsort(array, comp_key=None):
     min_run = 32
     n = len(array)
 
@@ -81,7 +87,7 @@ def timsort(array):
     # input array. The size of these slices is defined by
     # your `min_run` size.
     for i in range(0, n, min_run):
-        insertion_sort(array, i, min((i + min_run - 1), n - 1))
+        insertion_sort(array, i, min((i + min_run - 1), n - 1), comp_key)
 
     # Now you can start merging the sorted slices.
     # Start from `min_run`, doubling the size on
@@ -104,7 +110,8 @@ def timsort(array):
             # go from `midpoint + 1` to `end + 1`.
             merged_array = merge(
                 left=array[start:midpoint + 1],
-                right=array[midpoint + 1:end + 1])
+                right=array[midpoint + 1:end + 1],
+                comp_key=comp_key)
 
             # Finally, put the merged array back into
             # your array
@@ -120,4 +127,4 @@ if __name__ == "__main__":
     array = [randint(0, 1000) for i in range(ARRAY_LENGTH)]
     comp_key = lambda elem1, elem2: elem1 > elem2
     print(array)
-    print(timsort(array))
+    print(timsort(array, comp_key))

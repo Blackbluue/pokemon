@@ -2,14 +2,12 @@ from copy import copy
 from csv import DictReader
 from operator import itemgetter
 
+from chunks import timsort
+
 
 class Pokedex:
     """Interface for a Pokedex"""
     ###--TO DO--###
-    # make sorted views of Pokedex
-    # height, weight, cap_rate, egg cycles,
-    # exp yield, exp growth rate, happiness, total stats, total evs,
-    # egg groups, evolution chain, owned
     # make filter methods
     
     # Sorting keys
@@ -76,6 +74,7 @@ class Pokedex:
         """
         dex_dict = dict()
         dex_view = list()
+        dex_view.__getitem__ = lambda index: self._dex_dict[dex_view[inex]]
         for row in reader:
             dex_dict[row["number"]] = DexEntry(row)
             dex_view.append(row["number"])
@@ -120,7 +119,7 @@ class Pokedex:
             return lambda entry: entry["name"]["English"]
         elif field == self.TYPE:
             return lambda entry: entry["type"]
-        elif field == self.NUMBER:  # default sort order
+        elif field == self.NUMBER:
             return lambda entry: entry["number"]
         elif field == self.CLASSIFICATION:
             return lambda entry: entry["classification"]
@@ -170,10 +169,12 @@ class Pokedex:
             return lambda entry: entry["evs"]["speed"]
         elif field == self.EGG_GROUPS:
             return lambda entry: entry["egg_groups"]
-        elif field == self.EVOLUTION:  # not finished
-            return lambda entry: entry["evolve_to"]
+        # elif field == self.EVOLUTION:  # not finished
+            # return lambda entry: entry["evolve_to"]
         elif field == self.OWNED:
             return lambda entry: entry["owned"]
+        else:  # default sort order
+            return lambda entry: entry["number"]
 
     def sort(self, key, reverse=False):
         """Sort the entries of this Pokedex based on the given sort key.
@@ -188,10 +189,86 @@ class Pokedex:
         :type reverse: bool, optional
         """
         if key == EVOLUTION:
-            pass
+            def comp_key(elem1, elem2):
+                if elem1["evolve_to"]:
+                    if elem1["evolve_to"] == elem2["number"]:
+                        return True
+                    else:
+                        return False
+                else:
+                    return elem1["number"] > elem2["number"]
+            timsort(self.dex_view, comp_key=comp_key)
         else:
             sort_key = self._search_key(key)
             self.dex_view.sort(key=sort_key,  reverse=reverse)
+
+    def filter(self, field, criteria):
+        """Filter the Pokedex based on the given set of rules.
+
+        :param field: The field to check for filtering.
+        :param criteria: The data that i compared against the Pokedex
+            for filtering.
+        """
+        if field == self.NAME:
+            for entry in self._dex_view
+        elif field == self.TYPE:
+            return lambda entry: entry["type"]
+        elif field == self.NUMBER:
+            return lambda entry: entry["number"]
+        elif field == self.CLASSIFICATION:
+            return lambda entry: entry["classification"]
+        elif field == self.HEIGHT:
+            return lambda entry: entry["height"]
+        elif field == self.WEIGHT:
+            return lambda entry: entry["weight"]
+        elif field == self.CAPTURE_RATE:
+            return lambda entry: entry["capture_rate"]
+        elif field == self.EGG_CYCLES:
+            return lambda entry: entry["base_egg_cycles"]
+        elif field == self.ABILITIES:
+            return lambda entry: entry["abilities"]
+        elif field == self.EXP_YIELD:
+            return lambda entry: entry["exp_yield"]
+        elif field == self.EXP_GROWTH_RATE:
+            return lambda entry: entry["experience_growth"]
+        elif field == self.HAPPINESS:
+            return lambda entry: entry["happiness"]
+        elif field == self.STATS_TOTAL:
+            return lambda entry: sum(entry["base_stats"].values())
+        elif field == self.STATS_HP:
+            return lambda entry: entry["base_stats"]["hp"]
+        elif field == self.STATS_ATK:
+            return lambda entry: entry["base_stats"]["attack"]
+        elif field == self.STATS_DEF:
+            return lambda entry: entry["base_stats"]["defense"]
+        elif field == self.STATS_SP_ATK:
+            return lambda entry: entry["base_stats"]["sp_attack"]
+        elif field == self.STATS_SP_DEF:
+            return lambda entry: entry["base_stats"]["sp_defense"]
+        elif field == self.STATS_SPD:
+            return lambda entry: entry["base_stats"]["speed"]
+        elif field == self.EV_TOTAL:
+            return lambda entry: sum(entry["evs"].values())
+        elif field == self.EV_HP:
+            return lambda entry: entry["evs"]["hp"]
+        elif field == self.EV_ATK:
+            return lambda entry: entry["evs"]["attack"]
+        elif field == self.EV_DEF:
+            return lambda entry: entry["evs"]["defense"]
+        elif field == self.EV_SP_ATK:
+            return lambda entry: entry["evs"]["sp_attack"]
+        elif field == self.EV_SP_DEF:
+            return lambda entry: entry["evs"]["sp_defense"]
+        elif field == self.EV_SPD:
+            return lambda entry: entry["evs"]["speed"]
+        elif field == self.EGG_GROUPS:
+            return lambda entry: entry["egg_groups"]
+        # elif field == self.EVOLUTION:  # not finished
+            # return lambda entry: entry["evolve_to"]
+        elif field == self.OWNED:
+            return lambda entry: entry["owned"]
+        else:  # default sort order
+            return lambda entry: entry["number"]
 
     def results(self):
         """Return the current state of this Pokedex, with sorting and filtering.
@@ -199,7 +276,7 @@ class Pokedex:
         :return: The current state of this Pokedex. It is immutable.
         :rtype: list
         """
-        pass
+        return self._dex_view.copy()
 
 
 class DexEntry:
