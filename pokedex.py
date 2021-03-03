@@ -74,7 +74,7 @@ class Pokedex:
         """
         dex_dict = dict()
         dex_view = list()
-        dex_view.__getitem__ = lambda index: self._dex_dict[dex_view[inex]]
+        # dex_view.__getitem__ = lambda index: self._dex_dict[dex_view[inex]]
         for row in reader:
             dex_dict[row["number"]] = DexEntry(row)
             dex_view.append(row["number"])
