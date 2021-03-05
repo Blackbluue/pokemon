@@ -8,6 +8,7 @@ from chunks import timsort
 class Pokedex:
     """Interface for a Pokedex"""
     ###--TO DO--###
+    # fix sorting on exp growth rate
     # make filter methods
     
     # Sorting keys
@@ -40,11 +41,12 @@ class Pokedex:
     EGG_GROUPS = 26
     EVOLUTION = 27
     OWNED = 28
+    ABILITIES_FIRST = 29
+    ABILITIES_SECOND = 30
+    ABILITIES_HIDDEN = 31
 
     # Filtering keys
     # all sort keys also function as filter keys
-    ABILITIES_SECOND = 29
-    ABILITIES_HIDDEN = 30
 
     def __init__(self, dex_file):
         """Constructor for the Pokedex class.
@@ -115,6 +117,7 @@ class Pokedex:
             specified by ``field``
         """
         if field == self.NAME:
+            # only checking enlgish name, may update in future
             return lambda entry: entry["name"]["English"]
         elif field == self.TYPE:
             return lambda entry: entry["type"]
@@ -131,7 +134,14 @@ class Pokedex:
         elif field == self.EGG_CYCLES:
             return lambda entry: entry["base_egg_cycles"]
         elif field == self.ABILITIES:
+            # checks all 3 abilities
             return lambda entry: entry["abilities"]
+        elif field == self.ABILITIES_FIRST:
+            return lambda entry: entry["abilities"][0]
+        elif field == self.ABILITIES_SECOND:
+            return lambda entry: entry["abilities"][1]
+        elif field == self.ABILITIES_HIDDEN:
+            return lambda entry: entry["abilities"][2]
         elif field == self.EXP_YIELD:
             return lambda entry: entry["exp_yield"]
         elif field == self.EXP_GROWTH_RATE:
@@ -168,8 +178,8 @@ class Pokedex:
             return lambda entry: entry["evs"]["speed"]
         elif field == self.EGG_GROUPS:
             return lambda entry: entry["egg_groups"]
-        # elif field == self.EVOLUTION:  # not finished
-            # return lambda entry: entry["evolve_to"]
+        elif field == self.EVOLUTION:
+            return lambda entry: entry["evolve_to"]
         elif field == self.OWNED:
             return lambda entry: entry["owned"]
         else:  # default sort order
@@ -205,7 +215,25 @@ class Pokedex:
         :param criteria: The data that i compared against the Pokedex
             for filtering.
         """
+        if field == ABILITIES_SECOND:
+            extractor = lambda entry: entry["abilities"][1]
+        elif field == ABILITIES_HIDDEN:
+            extractor = lambda entry: entry["abilities"][2]
+        else:
+            extractor = self._search_key(field)
+        for index, entry_number in enumerate(self._dex_view):
+                entry = self._dex_dict[entry_number]
+                try:
+                    # check if field is iterable
+                    if criteria not in extractor(entry):
+                        del self._dex_view[index]
+                except TypeError:
+                    # field is not iterable, assume primative type
+                    if criteria != extractor(entry):
+                        del self._dex_view[index]
+
         if field == self.NAME:
+            lambda entry: entry["name"]["English"]
             for index, entry_number in enumerate(self._dex_view):
                 entry = self._dex_dict[entry_number]
                 # only checking enlgish name, may update in future
@@ -257,9 +285,15 @@ class Pokedex:
                 if criteria != entry["exp_yield"]:
                     del self._dex_view[index]
         elif field == self.EXP_GROWTH_RATE:
-            # return lambda entry: entry["experience_growth"]
+            for index, entry_number in enumerate(self._dex_view):
+                entry = self._dex_dict[entry_number]
+                if criteria != entry["experience_growth"]:
+                    del self._dex_view[index]
         elif field == self.HAPPINESS:
-            # return lambda entry: entry["happiness"]
+            for index, entry_number in enumerate(self._dex_view):
+                entry = self._dex_dict[entry_number]
+                if criteria != entry["happiness"]:
+                    del self._dex_view[index]
         elif field == self.STATS_TOTAL:
             # return lambda entry: sum(entry["base_stats"].values())
         elif field == self.STATS_HP:
