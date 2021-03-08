@@ -9,7 +9,6 @@ class Pokedex:
     """Interface for a Pokedex"""
     ###--TO DO--###
     # fix sorting on exp growth rate
-    # make filter methods
     
     # Sorting keys
     NAME = 0
@@ -74,7 +73,9 @@ class Pokedex:
             and a list containing only the id numbers of each entry.
         :rtype: tuple of (dict, list)
         """
+        # information on all pokemon in pokedex
         dex_dict = dict()
+        # list view for filtering and sorting
         dex_view = list()
         for row in reader:
             dex_dict[row["number"]] = DexEntry(row)
@@ -133,8 +134,7 @@ class Pokedex:
             return lambda entry: entry["capture_rate"]
         elif field == self.EGG_CYCLES:
             return lambda entry: entry["base_egg_cycles"]
-        elif field == self.ABILITIES:
-            # checks all 3 abilities
+        elif field == self.ABILITIES:  # checks all 3 abilities
             return lambda entry: entry["abilities"]
         elif field == self.ABILITIES_FIRST:
             return lambda entry: entry["abilities"][0]
@@ -199,8 +199,8 @@ class Pokedex:
         """
         if key == EVOLUTION:
             def comp_key(elem1, elem2):
-                if elem1["evolve_to"]:
-                    return elem1["evolve_to"] == elem2["number"]
+                if elem1["evolve_to"]:  # check if has evolution
+                    return elem2["number"] in elem1["evolve_to"]
                 else:
                     return elem1["number"] > elem2["number"]
             timsort(self.dex_view, comp_key=comp_key)
@@ -215,7 +215,9 @@ class Pokedex:
         :param criteria: The data that i compared against the Pokedex
             for filtering.
         """
-        if field == ABILITIES_SECOND:
+        if field == ABILITIES_FIRST:
+            extractor = lambda entry: entry["abilities"][0]
+        elif field == ABILITIES_SECOND:
             extractor = lambda entry: entry["abilities"][1]
         elif field == ABILITIES_HIDDEN:
             extractor = lambda entry: entry["abilities"][2]
@@ -232,105 +234,6 @@ class Pokedex:
                     if criteria != extractor(entry):
                         del self._dex_view[index]
 
-        if field == self.NAME:
-            lambda entry: entry["name"]["English"]
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                # only checking enlgish name, may update in future
-                if criteria not in entry["name"]["English"]:
-                    del self._dex_view[index]
-        elif field == self.TYPE:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria not in entry["type"]:
-                    del self._dex_view[index]
-        elif field == self.NUMBER:
-            for index, entry_number in enumerate(self._dex_view):
-                if criteria not in entry_number:
-                    del self._dex_view[index]
-        elif field == self.CLASSIFICATION:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria not in entry["classification"]:
-                    del self._dex_view[index]
-        elif field == self.HEIGHT:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria != entry["height"]:
-                    del self._dex_view[index]
-        elif field == self.WEIGHT:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria != entry["weight"]:
-                    del self._dex_view[index]
-        elif field == self.CAPTURE_RATE:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria != entry["capture_rate"]:
-                    del self._dex_view[index]
-        elif field == self.EGG_CYCLES:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria != entry["base_egg_cycles"]:
-                    del self._dex_view[index]
-        elif field == self.ABILITIES:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                for ability in entry["abilities"]:
-                    if criteria not in ability:
-                        del self._dex_view[index]
-        elif field == self.EXP_YIELD:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria != entry["exp_yield"]:
-                    del self._dex_view[index]
-        elif field == self.EXP_GROWTH_RATE:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria != entry["experience_growth"]:
-                    del self._dex_view[index]
-        elif field == self.HAPPINESS:
-            for index, entry_number in enumerate(self._dex_view):
-                entry = self._dex_dict[entry_number]
-                if criteria != entry["happiness"]:
-                    del self._dex_view[index]
-        elif field == self.STATS_TOTAL:
-            # return lambda entry: sum(entry["base_stats"].values())
-        elif field == self.STATS_HP:
-            # return lambda entry: entry["base_stats"]["hp"]
-        elif field == self.STATS_ATK:
-            # return lambda entry: entry["base_stats"]["attack"]
-        elif field == self.STATS_DEF:
-            # return lambda entry: entry["base_stats"]["defense"]
-        elif field == self.STATS_SP_ATK:
-            # return lambda entry: entry["base_stats"]["sp_attack"]
-        elif field == self.STATS_SP_DEF:
-            # return lambda entry: entry["base_stats"]["sp_defense"]
-        elif field == self.STATS_SPD:
-            # return lambda entry: entry["base_stats"]["speed"]
-        elif field == self.EV_TOTAL:
-            # return lambda entry: sum(entry["evs"].values())
-        elif field == self.EV_HP:
-            # return lambda entry: entry["evs"]["hp"]
-        elif field == self.EV_ATK:
-            # return lambda entry: entry["evs"]["attack"]
-        elif field == self.EV_DEF:
-            # return lambda entry: entry["evs"]["defense"]
-        elif field == self.EV_SP_ATK:
-            # return lambda entry: entry["evs"]["sp_attack"]
-        elif field == self.EV_SP_DEF:
-            # return lambda entry: entry["evs"]["sp_defense"]
-        elif field == self.EV_SPD:
-            # return lambda entry: entry["evs"]["speed"]
-        elif field == self.EGG_GROUPS:
-            # return lambda entry: entry["egg_groups"]
-        # elif field == self.EVOLUTION:  # not finished
-            # return lambda entry: entry["evolve_to"]
-        elif field == self.OWNED:
-            # return lambda entry: entry["owned"]
-        else:  # default sort order
-            # return lambda entry: entry["number"]
-
     def results(self):
         """Return the current state of this Pokedex, with sorting and filtering.
 
@@ -340,6 +243,10 @@ class Pokedex:
         """
         return [self._dex_dict[number] for number in self._dex_view]
 
+    def reset(self):
+        """Reset any sorting and filtering done on this Pokedex."""
+        self._dex_view.clear()
+        self._dex_view.extend(sorted(self._dex_dict.keys()))
 
 class DexEntry:
     """A single entry for a Pokemon in a Pokedex."""
