@@ -1,3 +1,6 @@
+from copy import copy
+from csv import DictReader
+
 class Itemdex:
     """Interface for an encyclopedia of items"""
     ###--TO DO--###
@@ -122,7 +125,6 @@ class Itemdex:
         """Reset any sorting and filtering done on this Itemdex."""
         self._dex_view.clear()
         self._dex_view.extend(sorted(self._dex_dict.keys()))
-
 
 class DexEntry:
     """A single entry for an item in a Itemdex."""
