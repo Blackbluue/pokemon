@@ -16,3 +16,6 @@ def main():
     gui = Gui()
 
     # set up gui events
+
+if __name__ == "__main__":
+    main()
