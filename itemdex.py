@@ -1,10 +1,18 @@
-from copy import copy
 from csv import DictReader
 
+from dex_entry import DexEntry
 class Itemdex:
     """Interface for an encyclopedia of items"""
     ###--TO DO--###
-    # define _search_key()
+
+    # Sorting keys
+    NAME = 0
+    TYPE = 1
+    ID = 2
+    BUY = 3
+    SELL = 4
+    EFFECT = 5
+    FLAVOR_TEXT = 6
 
     def __init__(self, dex_file):
         """Constructor for the Itemdex class.
@@ -41,11 +49,11 @@ class Itemdex:
         # list view for filtering and sorting
         dex_view = list()
         for row in reader:
-            dex_dict[row["number"]] = DexEntry(row)
-            dex_view.append(row["number"])
+            dex_dict[row["id"]] = DexEntry(row)
+            dex_view.append(row["id"])
         return dex_dict, dex_view
 
-        def __len__(self):
+    def __len__(self):
         """The size of the Pokedex."""
         return len(self._dex_dict)
     
@@ -66,17 +74,35 @@ class Itemdex:
 
     def __contains__(self, item):
         """True if an entry with the specified id exists; otherwise false."""
-        return True if item in self._dex_dict else False
+        return item in self._dex_dict
 
     def _search_key(self, field):
         """Internal method for building a sort/filter key.
         :param field: Flag signifiying which field to use for data look up.
 
         :return: A single argument function that takes in one
-            :class:'itemdex.DexEntry' object and returns the data in the field
+            :class:'dex_entry.DexEntry' object and returns the data in the field
             specified by ``field``
         """
-        pass
+        if field == self.NAME:
+            return lambda entry: entry["name"]
+        elif field == self.TYPE:
+            return lambda entry: entry["type"]
+        elif field == self.ID:
+            return lambda entry: entry["id"]
+        elif field == self.BUY:
+            return lambda entry: entry["purchase_price"]
+        elif field == self.SELL:
+            return lambda entry: entry["sale_price"]
+        elif field == self.EFFECT:
+            return lambda entry: entry["effect"]
+        elif field == self.FLAVOR_TEXT:
+            return lambda entry: entry["flavor_text"]
+        else:  # specific/unknown field name
+            try:  # check name
+                return lambda entry: entry[field.lower()]
+            except:  # default sort order
+                return lambda entry: entry["name"]
 
     def sort(self, key, reverse=False):
         """Sort the entries of this Itemdex based on the given sort key.
@@ -91,7 +117,7 @@ class Itemdex:
         :type reverse: bool, optional
         """
         sort_key = self._search_key(key)
-        self.dex_view.sort(key=sort_key,  reverse=reverse)
+        self._dex_view.sort(key=sort_key,  reverse=reverse)
 
     def filter(self, field, criteria):
         """Filter the Itemdex based on the given set of rules.
@@ -119,77 +145,23 @@ class Itemdex:
             to the internal sorting/filtering of the Itemdex, and vice-versa.
         :rtype: list
         """
-        return [self._dex_dict[number] for number in self._dex_view]
+        return [self._dex_dict[item_id] for item_id in self._dex_view]
 
     def reset(self):
         """Reset any sorting and filtering done on this Itemdex."""
         self._dex_view.clear()
         self._dex_view.extend(sorted(self._dex_dict.keys()))
 
-class DexEntry:
+class ItemEntry(DexEntry):
     """A single entry for an item in a Itemdex."""
 
     def __init__(self, info):
         """Constructor for a single Itemdex entry.
         
-        :praram info: A dict containing all the information on this Itemdex entry.
+        :param info: A dict containing all the information on this Itemdex entry.
         :type info: dict
         """
-        self._dex_info = info
+        super().__init__(info)
         # convert data to internal list
         # convert data to internal dicts
-        
-    @staticmethod
-    def _str_to_dict(string, key_type=None, value_type=None):
-        """Convert a string to a dictionary.
-
-        :param string: The string to convert.
-        :type string: str
-        :param key_type: a single argument function used to extract the
-            desired type for the keys of the dict.
-        :type key_type: function, optional
-        :param value_type: a single argument function used to extract the
-            desired type for the values of the dict.
-        :type value_type: function, optional
-
-        :return: The converted dict object.
-        :rtype: dict
-        """
-        string = string.strip("[]").split(",")
-        temp_list = [item.split(":") for item in string]
-        results = dict()
-        for key, value in temp_list:
-            if key_type:
-                key = key_type(key)
-            if value_type:
-                value = value_type(value)
-            results[key] = value
-        return results
-
-    @staticmethod
-    def _str_to_list(string, value_type=None):
-        """Convert a string to a list.
-        
-        :param string: The string to convert.
-        :type string: str
-        :param value_type: a single argument function used to extract the
-            desired type for the values of the list.
-        :type value_type: function, optional
-
-        :return: The converted list object.
-        :rtype: list
-        """
-        if value_type:
-            return [value_type(item) for item in string.strip("[]").split(",")]
-        else:
-            return string.strip("[]").split(",")
-
-    def __getitem__(self, key):
-        """Return a single property from this DexEntry.
-        
-        :param key: The name of the property.
-        :type key: str
-
-        :return: The requested property value. Type is dependent on the property.
-        """
-        return copy(self._dex_info[key])
+        # convert data to primative types

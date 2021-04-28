@@ -1,8 +1,8 @@
-from copy import copy
 from csv import DictReader
 from operator import itemgetter
 
 from chunks import timsort
+from dex_entry import DexEntry
 
 
 class Pokedex:
@@ -107,14 +107,14 @@ class Pokedex:
 
     def __contains__(self, item):
         """True if an entry with the specified id exists; otherwise false."""
-        return True if item in self._dex_dict else False
+        return item in self._dex_dict
    
     def _search_key(self, field):
         """Internal method for building a sort/filter key.
         :param field: Flag signifiying which field to use for data look up.
 
         :return: A single argument function that takes in one
-            :class:'pokedex.DexEntry' object and returns the data in the field
+            :class:'dex_entry.DexEntry' object and returns the data in the field
             specified by ``field``
         """
         if field == self.NAME:
@@ -215,14 +215,7 @@ class Pokedex:
         :param criteria: The data that i compared against the Pokedex
             for filtering.
         """
-        if field == ABILITIES_FIRST:
-            extractor = lambda entry: entry["abilities"][0]
-        elif field == ABILITIES_SECOND:
-            extractor = lambda entry: entry["abilities"][1]
-        elif field == ABILITIES_HIDDEN:
-            extractor = lambda entry: entry["abilities"][2]
-        else:
-            extractor = self._search_key(field)
+        extractor = self._search_key(field)
         for index, entry_number in enumerate(self._dex_view):
                 entry = self._dex_dict[entry_number]
                 try:
@@ -248,7 +241,7 @@ class Pokedex:
         self._dex_view.clear()
         self._dex_view.extend(sorted(self._dex_dict.keys()))
 
-class DexEntry:
+class PokeEntry(DexEntry):
     """A single entry for a Pokemon in a Pokedex."""
 
     def __init__(self, info):
@@ -257,7 +250,7 @@ class DexEntry:
         :praram info: A dict containing all the information on this Pokdex entry.
         :type info: dict
         """
-        self._dex_info = info
+        super().__init__(info)
         # convert data to internal list
         self._dex_info["type"] = self._str_to_list(self._dex_info["type"])
         self._dex_info["abilities"] = self._str_to_list(self._dex_info["abilities"])
@@ -272,6 +265,7 @@ class DexEntry:
         self._dex_info["evs"] = self._str_to_dict(self._dex_info["evs"], value_type=int)
         self._dex_info["flavor_text"] = self._str_to_dict(self._dex_info["flavor_text"])
         self._dex_info["move_set_level"] = self._str_to_dict(self._dex_info["move_set_level"], key_type=int)
+        # convert data to primative types
 
     @property
     def owned(self):
@@ -283,58 +277,3 @@ class DexEntry:
         if status.lower() not in ["unknown", "seen", "owned"]:
             raise ValueError("Improper value for 'owned' attribute.")
         self._dex_info["owned"] = status.lower()
-
-    @staticmethod
-    def _str_to_dict(string, key_type=None, value_type=None):
-        """Convert a string to a dictionary.
-
-        :param string: The string to convert.
-        :type string: str
-        :param key_type: a single argument function used to extract the
-            desired type for the keys of the dict.
-        :type key_type: function, optional
-        :param value_type: a single argument function used to extract the
-            desired type for the values of the dict.
-        :type value_type: function, optional
-
-        :return: The converted dict object.
-        :rtype: dict
-        """
-        string = string.strip("[]").split(",")
-        temp_list = [item.split(":") for item in string]
-        results = dict()
-        for key, value in temp_list:
-            if key_type:
-                key = key_type(key)
-            if value_type:
-                value = value_type(value)
-            results[key] = value
-        return results
-
-    @staticmethod
-    def _str_to_list(string, value_type=None):
-        """Convert a string to a list.
-        
-        :param string: The string to convert.
-        :type string: str
-        :param value_type: a single argument function used to extract the
-            desired type for the values of the list.
-        :type value_type: function, optional
-
-        :return: The converted list object.
-        :rtype: list
-        """
-        if value_type:
-            return [value_type(item) for item in string.strip("[]").split(",")]
-        else:
-            return string.strip("[]").split(",")
-
-    def __getitem__(self, key):
-        """Return a single property from this DexEntry.
-        
-        :param key: The name of the property.
-        :type key: str
-
-        :return: The requested property value. Type is dependent on the property.
-        """
-        return copy(self._dex_info[key])
