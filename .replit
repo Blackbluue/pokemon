@@ -1,2 +1,2 @@
 language = "python"
-run = "python gui.py"
+run = "python main.py"
