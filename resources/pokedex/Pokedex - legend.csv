@@ -1,0 +1,26 @@
+name,type,number,gender_ratio,classification,height,weight,capture_rate,base_egg_cycles,abilities,exp_yield,experience_growth,base_happiness,base_stats,evs,egg_groups,evolve_to,flavor_text,move_set_level,move_set_machine,move_set_egg,move_set_tutor,owned
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+name values,type values,number values,gender_ratio values,classification values,height values,weight values,capture_rate values,base_egg_cycles values,abilities values,exp_yield values,experience_growth values,base_happiness values,base_stats values,evs values,egg_groups values,evolve_to values,flavor_text values,move_set_level values,move_set_machine values,move_set_egg values,move_set_tutor values,owned values
+"[English:""any viable string"",
+Japan:""any viable string"",
+French:""any viable string"",
+Korean:""any viable string"",
+German:""any viable string""]","[any valid type, (any valid type)]",integer(:region_code),percent:percent total 100,any viable string,metric height in meters,metric weight in kilograms,integer 0-255,integer > 0,"[""any viable string"",""any viable string"",""any viable string""]
+first 2 elements are standard abilities, last is hidden ability",integer > 0,"one from (Erratic, Fast, Medium Fast, Medium Slow, Slow, Fluctuating)",integer 0-255,"[hp:integer,
+attack:integer,
+defense:integer,
+sp_attack:integer,
+sp_defense:integer,
+speed:integer]","[hp:integer 0-255,
+attack:integer 0-255,
+defense:integer 0-255,
+sp_attack:integer 0-255,
+sp_defense:integer 0-255,
+speed:integer 0-255]","[monster, water_1, bug, flying,
+field, fairy, grass, human_shape,
+water_3, mineral, amorphous,
+water_2, ditto, dragon,
+undiscovered]","any valid pokemon id number, or empty","[game_code:""any viable string""]","[integer or ""evolve"":any valid move name]",[move_machine_code],[any valid move name],[any valid move name],"unknown
+seen
+owned"

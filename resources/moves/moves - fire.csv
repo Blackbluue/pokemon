@@ -1,0 +1,4 @@
+name,type,category,pp,base_power,accuracy,effect,effect_rate,condition,cit_ratio,priority,recoil,crash,target,contact,sound,punch,biting,snatchable,gravity,defrost,reflectable,blockable,copyable,flavor_text,unique_effect
+Blaze Kick,Fire,Physical,10,85,90,Status:Burn,10,None,12.5,0,None,None,single_adjacent_foe,Yes,No,No,No,No,No,No,No,Yes,Yes,The user launches a kick that lands a critical hit more easily. This may also leave the target with a burn.,None
+Flare Blitz,Fire,Physical,15,120,100,Status:Burn,10,None,4.17,0,0.33,None,single_adjacent_foe,Yes,No,No,No,No,No,Yes,No,Yes,Yes,The user cloaks itself in fire and charges the target. This also damages the user quite a lot. This attack may leave the target with a burn.,None
+Sunny Day,Fire,Other,5,None,None,Weather:Sun,None,None,None,0,None,None,field,No,No,No,No,No,No,No,No,No,No,"The user intensifies the sun for five turns, powering up Fire-type moves. It lowers the power of Water-type moves.",None
