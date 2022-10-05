@@ -1,4 +1,7 @@
 import pygame
+
+from window import Window
+
 ## MAIN APP FEATURES ##
 # Pokedex
 # Custom Pokemon teams
@@ -10,6 +13,7 @@ import pygame
 # Pokemon news feed
 
 def main():
+    poke_window = Window()
     # loop until the user clicks the close button.
     done = False
 
@@ -26,7 +30,7 @@ def main():
         pass
 
         # --- Drawing code should go here
-        pass
+        poke_window.draw_window()
 
          # --- Limit to 60 frames per second
         clock.tick(60)
