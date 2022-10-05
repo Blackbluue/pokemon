@@ -1,3 +1,4 @@
+import pygame
 ## MAIN APP FEATURES ##
 # Pokedex
 # Custom Pokemon teams
@@ -9,12 +10,26 @@
 # Pokemon news feed
 
 def main():
-    # pokedex = Pokedex(source_file)
-    # items = Itemdex(source_file)
-    # trainer = PokeTrainer(source_file)
-    # teams = PokeTeam(source_file)
+    # loop until the user clicks the close button.
+    done = False
 
-    # set up gui events
+    # used to manage how fast the screen updates
+    clock = pygame.time.Clock()
+    # -------- Main Program Loop -----------
+    while not done:
+        # --- Main event loop
+        for event in pygame.event.get():  # user did something
+            if event.type == pygame.QUIT:  # if user clicked close
+                done = True  # flag that we are done to exit the loop
+
+        # --- App logic should go here
+        pass
+
+        # --- Drawing code should go here
+        pass
+
+         # --- Limit to 60 frames per second
+        clock.tick(60)
 
 if __name__ == "__main__":
     main()
